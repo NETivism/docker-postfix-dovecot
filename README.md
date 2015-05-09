@@ -1,7 +1,7 @@
 
 ```bash
 docker run \
-    -it --name dovecot
+    -it --name dovecot \
     -p 25:25 \
     -p 993:993 \
     -p 587:587 \
@@ -12,7 +12,7 @@ docker run \
     -v /etc/ssl \
     -v /etc/opendkim \
     -v /var/log/container:/var/log \
-    NETivism/docker-postfix-dovecot \
+    jimyhuang/docker-postfix-dovecot \
     --email test@static.jimmyhub.net \
     --email test2@static.jimmyhub.net
 ```
