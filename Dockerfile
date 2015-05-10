@@ -5,7 +5,7 @@ ENV DEBIAN_FRONTEND noninteractive
 
 RUN \
   apt-get update -y && \
-  apt-get install -y -q pwgen postfix postfix-pcre dovecot-common dovecot-core dovecot-imapd opendkim opendkim-tools rsyslog supervisor
+  apt-get install -y -q pwgen postfix postfix-pcre dovecot-common dovecot-core dovecot-imapd opendkim opendkim-tools rsyslog supervisor vim
 
 ADD dovecot/dovecot.conf /etc/dovecot/dovecot.conf
 ADD opendkim/opendkim.conf /etc/opendkim.conf
