@@ -13,6 +13,7 @@ fi
   service postfix stop
   service opendkim stop
 )
+ln -s /home/vmail/passwd /etc/dovecot/
 
 # VMAIL
 groupadd -g 5000 vmail > /dev/null
