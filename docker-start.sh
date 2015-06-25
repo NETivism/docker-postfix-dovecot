@@ -11,8 +11,8 @@ docker run \
     -v /etc/ssl \
     -v /etc/opendkim \
     -v /etc/dovecot \
-    -v /home/vmail:/home/vmail \
-    -v /var/log/container:/var/log \
+    -v /var/vmail:/home/vmail \
+    -v /var/vmail/log:/var/log \
     jimyhuang/docker-postfix-dovecot \
     /init.sh --email test@static.jimmyhub.net --email test2@static.jimmyhub.net
 docker logs -f dovecot
