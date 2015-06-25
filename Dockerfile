@@ -14,7 +14,7 @@ ADD postfix/master.cf /etc/postfix/master.cf
 ADD supervisord.conf /etc/supervisor/conf.d/supervisord.conf
 ADD rsyslog/50-default.conf /etc/rsyslog.d/50-default.conf
 
-ADD init.sh /init.sh
+ADD container/init.sh /init.sh
 RUN chmod +x /init.sh
 
 ENTRYPOINT ["/init.sh"]
