@@ -62,93 +62,88 @@ test -f /etc/opendkim/KeyTable || touch /etc/opendkim/KeyTable
 test -f /etc/opendkim/SigningTable || touch /etc/opendkim/SigningTable
 
 echo -e 'SOCKET="inet:12301@localhost"\n' > /etc/default/opendkim
+mailaddr=$MAILADDR
+if [ -n "$mailaddr" ]; then
+  IFS=';' read -ra ADDR <<< "$mailaddr"
+  for mail in "${ADDR[@]}"; do
+    echo $mail;
+    if [[ -z "$mail" ]]; then
+      continue
+    fi
+    user=$(echo "$mail" | cut -f1 -d "@")
+    domain=$(echo "$mail" | cut -s -f2 -d "@")
 
-while [ $# -gt 0 ]
-do
-    case "$1" in
-      (--email)
-        shift
-        if [[ -z "$1" ]]
+    if [[ -z $domain ]]
+    then
+      continue
+    fi
+
+    if [[ -z $mailname ]]
+    then
+      mailname="$domain"
+    fi
+
+    dkim="/etc/opendkim/keys/$domain"
+
+    if [[ ! -d $dkim ]]
+    then
+      echo "Creating OpenDKIM folder $dkim"
+      mkdir -p $dkim
+      cd $dkim && opendkim-genkey -s mail -d $domain
+      chown -R opendkim:opendkim /etc/opendkim/keys/
+      echo -e "127.0.0.1\nlocalhost\n192.168.0.1/24\n*.$domain" >> /etc/opendkim/TrustedHosts
+      echo "*@$domain mail._domainkey.$domain" >> /etc/opendkim/SigningTable
+      echo "mail._domainkey.$domain $domain:mail:$dkim/mail.private" >> /etc/opendkim/KeyTable
+      cat "$dkim/mail.txt"
+    fi
+
+    # maildirmake.dovecot does only chown on user directory, we'll create domain directory instead
+    if [[ ! -d "/home/vmail/$domain" ]]
+    then
+      mkdir /home/vmail/$domain
+      chown 5000:5000 /home/vmail/$domain
+      chmod 700 /home/vmail/$domain
+    fi
+
+    if [[ ! -d "/home/vmail/$domain/$user" ]]
+    then
+      if [[ -z $(grep $user@$domain /etc/dovecot/users) ]]
+      then
+        echo "Adding user $user@$domain to /etc/dovecot/users"
+        echo "$user@$domain::5000:5000::/home/vmail/$domain/$user/:/bin/false::" >> /etc/dovecot/users
+
+        passwd=$(pwgen)
+        passhash=$(doveadm pw -p $passwd -u $user)
+        echo "Adding password for $user@$domain to /etc/dovecot/passwd: $passwd"
+        if [[ ! -f /etc/dovecot/passwd ]]
         then
-          continue
+          touch /etc/dovecot/passwd
+          chown root:dovecot /etc/dovecot/passwd
+          chmod 640 /etc/dovecot/passwd
         fi
+        echo "$user@$domain:$passhash" >> /etc/dovecot/passwd
+      fi
 
-        user=$(echo "$1" | cut -f1 -d "@")
-        domain=$(echo "$1" | cut -s -f2 -d "@")
+      # Create the needed Maildir directories
+      echo "Creating user directory /home/vmail/$domain/$user"
 
-        if [[ -z $domain ]]
-        then
-          continue
-        fi
+      /usr/bin/maildirmake.dovecot /home/vmail/$domain/$user 5000:5000
+      # Also make folders for Drafts, Sent, Junk and Trash
+      /usr/bin/maildirmake.dovecot /home/vmail/$domain/$user/.Drafts 5000:5000
+      /usr/bin/maildirmake.dovecot /home/vmail/$domain/$user/.Sent 5000:5000
+      /usr/bin/maildirmake.dovecot /home/vmail/$domain/$user/.Junk 5000:5000
+      /usr/bin/maildirmake.dovecot /home/vmail/$domain/$user/.Trash 5000:5000
 
-        if [[ -z $mailname ]]
-        then
-          mailname="$domain"
-        fi
-
-        dkim="/etc/opendkim/keys/$domain"
-
-        if [[ ! -d $dkim ]]
-        then
-          echo "Creating OpenDKIM folder $dkim"
-          mkdir -p $dkim
-          cd $dkim && opendkim-genkey -s mail -d $domain
-          chown -R opendkim:opendkim /etc/opendkim/keys/
-          echo -e "127.0.0.1\nlocalhost\n192.168.0.1/24\n*.$domain" >> /etc/opendkim/TrustedHosts
-          echo "*@$domain mail._domainkey.$domain" >> /etc/opendkim/SigningTable
-          echo "mail._domainkey.$domain $domain:mail:$dkim/mail.private" >> /etc/opendkim/KeyTable
-          cat "$dkim/mail.txt"
-        fi
-
-        # maildirmake.dovecot does only chown on user directory, we'll create domain directory instead
-        if [[ ! -d "/home/vmail/$domain" ]]
-        then
-          mkdir /home/vmail/$domain
-          chown 5000:5000 /home/vmail/$domain
-          chmod 700 /home/vmail/$domain
-        fi
-
-        if [[ ! -d "/home/vmail/$domain/$user" ]]
-        then
-          if [[ -z $(grep $user@$domain /etc/dovecot/users) ]]
-          then
-            echo "Adding user $user@$domain to /etc/dovecot/users"
-            echo "$user@$domain::5000:5000::/home/vmail/$domain/$user/:/bin/false::" >> /etc/dovecot/users
-
-            passwd=$(pwgen)
-            passhash=$(doveadm pw -p $passwd -u $user)
-            echo "Adding password for $user@$domain to /etc/dovecot/passwd: $passwd"
-            if [[ ! -f /etc/dovecot/passwd ]]
-            then
-              touch /etc/dovecot/passwd
-              chown root:dovecot /etc/dovecot/passwd
-              chmod 640 /etc/dovecot/passwd
-            fi
-            echo "$user@$domain:$passhash" >> /etc/dovecot/passwd
-          fi
-
-          # Create the needed Maildir directories
-          echo "Creating user directory /home/vmail/$domain/$user"
-
-          /usr/bin/maildirmake.dovecot /home/vmail/$domain/$user 5000:5000
-          # Also make folders for Drafts, Sent, Junk and Trash
-          /usr/bin/maildirmake.dovecot /home/vmail/$domain/$user/.Drafts 5000:5000
-          /usr/bin/maildirmake.dovecot /home/vmail/$domain/$user/.Sent 5000:5000
-          /usr/bin/maildirmake.dovecot /home/vmail/$domain/$user/.Junk 5000:5000
-          /usr/bin/maildirmake.dovecot /home/vmail/$domain/$user/.Trash 5000:5000
-
-          # To add user to Postfix virtual map file and relode Postfix
-          echo "Adding user to /etc/postfix/vmaps"
-          echo "$1  $domain/$user/" >> /etc/postfix/vmaps
-          postmap /etc/postfix/vmaps
-          grep -e "$domain" /etc/postfix/vhosts || echo "$domain" >> /etc/postfix/vhosts
-        else
-          echo "$user@$domain already exists, skipping"
-        fi
-        ;;
-    esac
-  shift
-done
+      # To add user to Postfix virtual map file and relode Postfix
+      echo "Adding user to /etc/postfix/vmaps"
+      echo "$mail  $domain/$user/" >> /etc/postfix/vmaps
+      postmap /etc/postfix/vmaps
+      grep -e "$domain" /etc/postfix/vhosts || echo "$domain" >> /etc/postfix/vhosts
+    else
+      echo "$user@$domain already exists, skipping"
+    fi
+  done
+fi
 
 postconf -e "myhostname = $mailname"
 subj="/C=US/ST=Denial/L=Springfield/O=Dis/CN=$mailname"
@@ -163,4 +158,5 @@ then
   openssl req -new -x509 -days 3650 -nodes -out /etc/ssl/certs/postfix.pem -keyout /etc/ssl/private/postfix.pem -subj $subj
 fi
 
+mkdir -p /var/log/supervisor
 supervisord -n -c /etc/supervisor/conf.d/supervisord.conf

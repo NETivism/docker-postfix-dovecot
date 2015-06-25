@@ -7,6 +7,7 @@ docker run \
     -p 993:993 \
     -p 587:587 \
     -e MAILNAME="static.jimmyhub.net" \
+    -e MAILADDR="testa@static.jimmyhub.net;testb@static.jimmyhub.net" \
     -v /etc/postfix \
     -v /etc/ssl \
     -v /etc/opendkim \
@@ -14,5 +15,5 @@ docker run \
     -v /var/vmail:/home/vmail \
     -v /var/vmail/log:/var/log \
     jimyhuang/docker-postfix-dovecot \
-    /init.sh --email test@static.jimmyhub.net --email test2@static.jimmyhub.net
+    /init.sh
 docker logs -f dovecot
