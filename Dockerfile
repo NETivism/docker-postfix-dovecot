@@ -11,6 +11,7 @@ ADD dovecot/dovecot.conf /etc/dovecot/dovecot.conf
 ADD opendkim/opendkim.conf /etc/opendkim.conf
 ADD dovecot/dovecot /etc/init.d/dovecot
 ADD postfix/master.cf /etc/postfix/master.cf
+ADD postfix/transport /etc/postfix/transport
 ADD container/supervisord.conf /etc/supervisor/conf.d/supervisord.conf
 ADD rsyslog/50-default.conf /etc/rsyslog.d/50-default.conf
 
