@@ -19,6 +19,8 @@ ln -s /home/vmail/passwd /etc/dovecot/
 groupadd -g 5000 vmail > /dev/null
 useradd -u 5000 -g 5000 -s /bin/bash vmail > /dev/null
 usermod -G opendkim postfix
+postmap /etc/postfix/transport
+postmap /etc/postfix/vmaps
 
 postconf -e 'milter_protocol = 2'
 postconf -e 'milter_default_action = accept'
@@ -27,6 +29,7 @@ postconf -e 'non_smtpd_milters = $smtpd_milters'
 postconf -e 'virtual_mailbox_domains = /etc/postfix/vhosts'
 postconf -e 'virtual_mailbox_base = /home/vmail'
 postconf -e 'virtual_mailbox_maps = hash:/etc/postfix/vmaps'
+postconf -e 'transport_maps = hash:/etc/postfix/transport'
 postconf -e 'smtpd_tls_key_file = /etc/ssl/private/postfix.pem'
 postconf -e 'smtpd_tls_cert_file = /etc/ssl/certs/postfix.pem'
 postconf -e 'virtual_minimum_uid = 1000'
@@ -35,7 +38,7 @@ postconf -e 'virtual_gid_maps = static:5000'
 postconf -e 'smtpd_helo_required = yes'
 postconf -e 'smtpd_sasl_auth_enable = yes'
 postconf -e 'smtpd_sasl_security_options = noanonymous'
-postconf -e 'smtpd_relay_restrictions = permit_mynetworks, permit_sasl_authenticated, reject_unauth_destination'
+postconf -e 'smtpd_relay_restrictions = permit_sasl_authenticated, permit_mynetworks, reject_unauth_destination'
 postconf -e 'smtpd_sasl_type = dovecot'
 postconf -e 'smtpd_sasl_path = private/auth'
 postconf -e 'smtpd_tls_auth_only = no'
@@ -51,15 +54,12 @@ postconf -e 'smtpd_tls_received_header = yes'
 postconf -e 'smtpd_tls_session_cache_timeout = 3600s'
 postconf -e 'tls_random_source = dev:/dev/urandom'
 postconf -e 'smtpd_tls_mandatory_protocols = !SSLv2, !SSLv3'
-postconf -e 'transport_maps = hash:/etc/postfix/transport'
 postconf -e 'polite_destination_concurrency_limit = 2'
 postconf -e 'polite_destination_rate_delay = 1s'
 postconf -e 'polite_destination_recipient_limit = 5'
 postconf -e 'turtle_destination_concurrency_limit = 1'
 postconf -e 'turtle_destination_rate_delay = 5s'
 postconf -e 'turtle_destination_recipient_limit = 2'
-
-postmap /etc/postfix/transport
 
 test -f /etc/postfix/vhosts || touch /etc/postfix/vhosts
 test -f /etc/postfix/vmaps || touch /etc/postfix/vmaps
