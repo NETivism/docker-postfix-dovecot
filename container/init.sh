@@ -96,7 +96,7 @@ if [ -n "$mailaddr" ]; then
 
     if [[ ! -d $dkim ]]
     then
-      echo "Creating OpenDKIM folder $dkim"
+      # echo "Creating OpenDKIM folder $dkim"
       mkdir -p $dkim
       cd $dkim && opendkim-genkey -s mail -d $domain
       chown -R opendkim:opendkim /etc/opendkim/keys/
@@ -118,12 +118,12 @@ if [ -n "$mailaddr" ]; then
     then
       if [[ -z $(grep $user@$domain /etc/dovecot/users) ]]
       then
-        echo "Adding user $user@$domain to /etc/dovecot/users"
+        #echo "Adding user $user@$domain to /etc/dovecot/users"
         echo "$user@$domain::5000:5000::/home/vmail/$domain/$user/:/bin/false::" >> /etc/dovecot/users
 
         passwd=$(pwgen)
         passhash=$(doveadm pw -p $passwd -u $user)
-        echo "Adding password for $user@$domain to /etc/dovecot/passwd: $passwd"
+        echo "Adding: $user@$domain $passwd"
         if [[ ! -f /etc/dovecot/passwd ]]
         then
           touch /etc/dovecot/passwd
@@ -134,7 +134,7 @@ if [ -n "$mailaddr" ]; then
       fi
 
       # Create the needed Maildir directories
-      echo "Creating user directory /home/vmail/$domain/$user"
+      # echo "Creating user directory /home/vmail/$domain/$user"
 
       /usr/bin/maildirmake.dovecot /home/vmail/$domain/$user 5000:5000
       # Also make folders for Drafts, Sent, Junk and Trash
@@ -144,12 +144,12 @@ if [ -n "$mailaddr" ]; then
       /usr/bin/maildirmake.dovecot /home/vmail/$domain/$user/.Trash 5000:5000
 
       # To add user to Postfix virtual map file and relode Postfix
-      echo "Adding user to /etc/postfix/vmaps"
+      #echo "Adding user to /etc/postfix/vmaps"
       echo "$mail  $domain/$user/" >> /etc/postfix/vmaps
       postmap /etc/postfix/vmaps
       grep -e "$domain" /etc/postfix/vhosts || echo "$domain" >> /etc/postfix/vhosts
     else
-      echo "$user@$domain already exists, skipping"
+      echo "Skipping $user@$domain (already exists)"
     fi
   done
 fi
