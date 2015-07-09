@@ -19,8 +19,16 @@ ln -s /home/vmail/passwd /etc/dovecot/
 groupadd -g 5000 vmail > /dev/null
 useradd -u 5000 -g 5000 -s /bin/bash vmail > /dev/null
 usermod -G opendkim postfix
-postmap /etc/postfix/transport
-postmap /etc/postfix/vmaps
+
+test -f /etc/postfix/vhosts || touch /etc/postfix/vhosts
+test -f /etc/postfix/vmaps || touch /etc/postfix/vmaps
+test -f /etc/dovecot/users || touch /etc/dovecot/users
+test -f /etc/postfix/transport || postmap /etc/postfix/transport
+
+test -d /etc/opendkim/keys || mkdir -p /etc/opendkim/keys
+test -f /etc/opendkim/TrustedHosts || touch /etc/opendkim/TrustedHosts
+test -f /etc/opendkim/KeyTable || touch /etc/opendkim/KeyTable
+test -f /etc/opendkim/SigningTable || touch /etc/opendkim/SigningTable
 
 postconf -e 'milter_protocol = 2'
 postconf -e 'milter_default_action = accept'
@@ -61,14 +69,6 @@ postconf -e 'turtle_destination_concurrency_limit = 1'
 postconf -e 'turtle_destination_rate_delay = 5s'
 postconf -e 'turtle_destination_recipient_limit = 2'
 
-test -f /etc/postfix/vhosts || touch /etc/postfix/vhosts
-test -f /etc/postfix/vmaps || touch /etc/postfix/vmaps
-test -f /etc/dovecot/users || touch /etc/dovecot/users
-
-test -d /etc/opendkim/keys || mkdir -p /etc/opendkim/keys
-test -f /etc/opendkim/TrustedHosts || touch /etc/opendkim/TrustedHosts
-test -f /etc/opendkim/KeyTable || touch /etc/opendkim/KeyTable
-test -f /etc/opendkim/SigningTable || touch /etc/opendkim/SigningTable
 
 echo -e 'SOCKET="inet:12301@localhost"\n' > /etc/default/opendkim
 mailaddr=$MAILADDR
@@ -159,12 +159,12 @@ subj="/C=US/ST=Denial/L=Springfield/O=Dis/CN=$mailname"
 
 if [[ ! -a '/etc/ssl/certs/dovecot.pem' ]]
 then
-  openssl req -new -x509 -days 3650 -nodes -out /etc/ssl/certs/dovecot.pem -keyout /etc/ssl/private/dovecot.pem -subj $subj
+  openssl req -new -x509 -days 3650 -nodes -out /etc/ssl/certs/dovecot.pem -keyout /etc/ssl/private/dovecot.pem -subj $subj 2>/dev/null
 fi
 
 if [[ ! -a '/etc/ssl/certs/postfix.pem' ]]
 then
-  openssl req -new -x509 -days 3650 -nodes -out /etc/ssl/certs/postfix.pem -keyout /etc/ssl/private/postfix.pem -subj $subj
+  openssl req -new -x509 -days 3650 -nodes -out /etc/ssl/certs/postfix.pem -keyout /etc/ssl/private/postfix.pem -subj $subj 2>/dev/null
 fi
 
 mkdir -p /var/log/supervisor
