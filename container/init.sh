@@ -23,7 +23,7 @@ usermod -G opendkim postfix
 test -f /etc/postfix/vhosts || touch /etc/postfix/vhosts
 test -f /etc/postfix/vmaps || touch /etc/postfix/vmaps
 test -f /etc/dovecot/users || touch /etc/dovecot/users
-test -f /etc/postfix/transport || postmap /etc/postfix/transport
+test -f /etc/postfix/transport && postmap /etc/postfix/transport
 
 test -d /etc/opendkim/keys || mkdir -p /etc/opendkim/keys
 test -f /etc/opendkim/TrustedHosts || touch /etc/opendkim/TrustedHosts
