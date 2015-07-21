@@ -6,6 +6,8 @@ docker run \
     -dit --name dovecot \
     -p 993:993 \
     -p 587:587 \
+    -p 25:25 \
+    -p 465:465 \
     -e MAILNAME="static.jimmyhub.net" \
     -e MAILADDR="testa@static.jimmyhub.net;testb@static.jimmyhub.net" \
     -v /etc/postfix \
