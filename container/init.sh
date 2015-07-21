@@ -149,6 +149,9 @@ if [ -n "$mailaddr" ]; then
       postmap /etc/postfix/vmaps
       grep -e "$domain" /etc/postfix/vhosts || echo "$domain" >> /etc/postfix/vhosts
     else
+      grep -e "$user@$domain" /etc/dovecot/users ||  echo "$user@$domain::5000:5000::/home/vmail/$domain/$user/:/bin/false::" >> /etc/dovecot/users
+      grep -e $mail /etc/postfix/vmaps || echo "$mail  $domain/$user/" >> /etc/postfix/vmaps
+      grep -e "$domain" /etc/postfix/vhosts || echo "$domain" >> /etc/postfix/vhosts
       echo "Skipping $user@$domain (already exists)"
     fi
   done

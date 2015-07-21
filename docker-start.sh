@@ -12,7 +12,7 @@ docker run \
     -e MAILADDR="testa@static.jimmyhub.net;testb@static.jimmyhub.net" \
     -v /etc/postfix \
     -v /etc/ssl \
-    -v /etc/opendkim \
+    -v /var/vmail/opendkim:/etc/opendkim \
     -v /etc/dovecot \
     -v /var/vmail:/home/vmail \
     -v /var/vmail/log:/var/log \
