@@ -8,11 +8,6 @@ then
   mailname=$(hostname -f)
 fi
 
-(
-  service dovecot stop
-  service postfix stop
-  service opendkim stop
-)
 ln -s /home/vmail/passwd /etc/dovecot/
 
 # VMAIL
@@ -71,6 +66,8 @@ postconf -e 'turtle_destination_recipient_limit = 2'
 
 
 echo -e 'SOCKET="inet:12301@localhost"\n' > /etc/default/opendkim
+echo -e '' > /home/vmail/vmail_account
+echo -e '' > /home/vmail/vmail_dkim
 mailaddr=$MAILADDR
 if [ -n "$mailaddr" ]; then
   IFS=';' read -ra ADDR <<< "$mailaddr"
@@ -103,7 +100,7 @@ if [ -n "$mailaddr" ]; then
       echo -e "127.0.0.1\nlocalhost\n192.168.0.1/24\n*.$domain" >> /etc/opendkim/TrustedHosts
       echo "*@$domain mail._domainkey.$domain" >> /etc/opendkim/SigningTable
       echo "mail._domainkey.$domain $domain:mail:$dkim/mail.private" >> /etc/opendkim/KeyTable
-      cat "$dkim/mail.txt"
+      cat "$dkim/mail.txt" > /home/vmail/vmail_dkim
     fi
 
     # maildirmake.dovecot does only chown on user directory, we'll create domain directory instead
@@ -123,7 +120,7 @@ if [ -n "$mailaddr" ]; then
 
         passwd=$(pwgen)
         passhash=$(doveadm pw -p $passwd -u $user)
-        echo "Adding: $user@$domain $passwd"
+        echo "$user@$domain $passwd" > /home/vmail/vmail_account
         if [[ ! -f /etc/dovecot/passwd ]]
         then
           touch /etc/dovecot/passwd
@@ -171,5 +168,7 @@ then
   openssl req -new -x509 -days 3650 -nodes -out /etc/ssl/certs/postfix.pem -keyout /etc/ssl/private/postfix.pem -subj $subj 2>/dev/null
 fi
 
-mkdir -p /var/log/supervisor
-supervisord -n -c /etc/supervisor/conf.d/supervisord.conf
+service postfix restart
+service opendkim restart
+rm -f /var/run/dovecot/master.pid
+/usr/sbin/dovecot -c /etc/dovecot/dovecot.conf -F

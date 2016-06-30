@@ -5,7 +5,7 @@ ENV DEBIAN_FRONTEND noninteractive
 
 RUN \
   apt-get update -y && \
-  apt-get install -y -q pwgen postfix postfix-pcre dovecot-common dovecot-core dovecot-imapd opendkim opendkim-tools rsyslog supervisor vim
+  apt-get install -y -q pwgen postfix postfix-pcre dovecot-common dovecot-core dovecot-imapd opendkim opendkim-tools rsyslog supervisor vim procps
 
 ADD dovecot/dovecot.conf /etc/dovecot/dovecot.conf
 ADD opendkim/opendkim.conf /etc/opendkim.conf
@@ -18,4 +18,4 @@ ADD rsyslog/50-default.conf /etc/rsyslog.d/50-default.conf
 ADD container/init.sh /init.sh
 RUN chmod +x /init.sh
 
-ENTRYPOINT ["/init.sh"]
+CMD ["/usr/bin/supervisord"]
