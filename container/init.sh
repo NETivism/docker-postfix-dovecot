@@ -8,7 +8,9 @@ then
   mailname=$(hostname -f)
 fi
 
-ln -s /home/vmail/passwd /etc/dovecot/
+if [ ! -f /home/vmail/passwd ]; then
+  ln -s /home/vmail/passwd /etc/dovecot/
+fi
 
 # VMAIL
 groupadd -g 5000 vmail > /dev/null
@@ -168,7 +170,14 @@ then
   openssl req -new -x509 -days 3650 -nodes -out /etc/ssl/certs/postfix.pem -keyout /etc/ssl/private/postfix.pem -subj $subj 2>/dev/null
 fi
 
+
+ps aux | grep "[u]sr/lib/postfix/master" | awk '{ print $2 }' | xargs kill
+ps aux | grep "[u]sr/sbin/opendkim" | awk '{ print $2 }' | xargs kill
+ps aux | grep "[u]sr/sbin/dovecot" | awk '{ print $2 }' | xargs kill
+rm -f /var/run/dovecot/master.pid
+
+sleep 5
+
 service postfix restart
 service opendkim restart
-rm -f /var/run/dovecot/master.pid
 /usr/sbin/dovecot -c /etc/dovecot/dovecot.conf -F
