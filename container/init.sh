@@ -8,9 +8,10 @@ then
   mailname=$(hostname -f)
 fi
 
-if [ ! -f /home/vmail/passwd ]; then
-  ln -s /home/vmail/passwd /etc/dovecot/
+if [ -f /etc/dovecot/passwd ]; then
+  rm -f /etc/dovecot/passwd
 fi
+ln -s /home/vmail/passwd /etc/dovecot/
 
 # VMAIL
 groupadd -g 5000 vmail > /dev/null
