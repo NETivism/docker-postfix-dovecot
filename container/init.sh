@@ -31,6 +31,7 @@ test -f /etc/opendkim/SigningTable || touch /etc/opendkim/SigningTable
 postconf -e 'milter_protocol = 2'
 postconf -e 'milter_default_action = accept'
 postconf -e 'smtpd_milters = inet:127.0.0.1:12301'
+postconf -e 'inet_protocols = ipv4'
 postconf -e 'non_smtpd_milters = $smtpd_milters'
 postconf -e 'virtual_mailbox_domains = /etc/postfix/vhosts'
 postconf -e 'virtual_mailbox_base = /home/vmail'
