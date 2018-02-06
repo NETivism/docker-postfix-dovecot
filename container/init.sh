@@ -22,6 +22,7 @@ test -f /etc/postfix/vhosts || touch /etc/postfix/vhosts
 test -f /etc/postfix/vmaps || touch /etc/postfix/vmaps
 test -f /etc/dovecot/users || touch /etc/dovecot/users
 test -f /etc/postfix/transport && postmap /etc/postfix/transport
+test -d /home/vmail/tmp || mkdir -p /home/vmail/tmp
 
 test -d /etc/opendkim/keys || mkdir -p /etc/opendkim/keys
 test -f /etc/opendkim/TrustedHosts || touch /etc/opendkim/TrustedHosts
@@ -70,8 +71,7 @@ postconf -e 'turtle_destination_recipient_limit = 2'
 
 
 echo -e 'SOCKET="inet:12301@localhost"\n' > /etc/default/opendkim
-echo -e '' > /home/vmail/vmail_account
-echo -e '' > /home/vmail/vmail_dkim
+echo -e '' > /home/vmail/tmp/vmail_dkim
 if [ -z "$MAILADDR" ]; then
   mailaddr=`cat /home/vmail/mailaddr`
 else
@@ -108,7 +108,7 @@ if [ -n "$mailaddr" ]; then
       echo -e "127.0.0.1\nlocalhost\n192.168.0.1/24\n*.$domain" >> /etc/opendkim/TrustedHosts
       echo "*@$domain mail._domainkey.$domain" >> /etc/opendkim/SigningTable
       echo "mail._domainkey.$domain $domain:mail:$dkim/mail.private" >> /etc/opendkim/KeyTable
-      cat "$dkim/mail.txt" > /home/vmail/vmail_dkim
+      cat "$dkim/mail.txt" > /home/vmail/tmp/vmail_dkim
     fi
 
     # maildirmake.dovecot does only chown on user directory, we'll create domain directory instead
@@ -128,7 +128,8 @@ if [ -n "$mailaddr" ]; then
 
         passwd=$(pwgen)
         passhash=$(doveadm pw -p $passwd -u $user)
-        echo "$user@$domain $passwd" > /home/vmail/vmail_account
+        echo "{\"email\":[{\"username\":\"${user}@${domain}\", \"password\":\"${passwd}\"}]}" > /home/vmail/tmp/vmail_json
+        echo "{\"email\":[{\"username\":\"${user}@${domain}\", \"password\":\"${passwd}\"}]}" > /home/vmail/tmp/${user}
         if [[ ! -f /etc/dovecot/passwd ]]
         then
           touch /etc/dovecot/passwd

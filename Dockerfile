@@ -1,4 +1,4 @@
-FROM debian:wheezy
+FROM debian:jessie
 MAINTAINER Jimmy Huang <jimmy@netivism.com.tw>
 
 ENV DEBIAN_FRONTEND noninteractive
