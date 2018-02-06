@@ -72,7 +72,11 @@ postconf -e 'turtle_destination_recipient_limit = 2'
 echo -e 'SOCKET="inet:12301@localhost"\n' > /etc/default/opendkim
 echo -e '' > /home/vmail/vmail_account
 echo -e '' > /home/vmail/vmail_dkim
-mailaddr=$MAILADDR
+if [ -z "$MAILADDR" ]; then
+  mailaddr=`cat /home/vmail/mailaddr`
+else
+  mailaddr=$MAILADDR
+fi
 if [ -n "$mailaddr" ]; then
   IFS=';' read -ra ADDR <<< "$mailaddr"
   for mail in "${ADDR[@]}"; do
