@@ -16,6 +16,8 @@ ADD container/supervisord.conf /etc/supervisor/conf.d/supervisord.conf
 ADD rsyslog/50-default.conf /etc/rsyslog.d/50-default.conf
 
 ADD container/init.sh /init.sh
+ADD container/regenpasswd.sh /usr/local/bin/regenpasswd.sh
 RUN chmod +x /init.sh
+RUN chmod +x /usr/local/bin/regenpasswd.sh
 
 CMD ["/usr/bin/supervisord"]
