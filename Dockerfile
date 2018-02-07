@@ -17,7 +17,9 @@ ADD rsyslog/50-default.conf /etc/rsyslog.d/50-default.conf
 
 ADD container/init.sh /init.sh
 ADD container/regenpasswd.sh /usr/local/bin/regenpasswd.sh
+ADD container/regenpasswd.sh /usr/local/bin/removemail.sh
 RUN chmod +x /init.sh
 RUN chmod +x /usr/local/bin/regenpasswd.sh
+RUN chmod +x /usr/local/bin/removemail.sh
 
 CMD ["/usr/bin/supervisord"]
