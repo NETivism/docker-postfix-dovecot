@@ -180,6 +180,7 @@ fi
 ps aux | grep "[u]sr/lib/postfix/master" | awk '{ print $2 }' | xargs kill
 ps aux | grep "[u]sr/sbin/opendkim" | awk '{ print $2 }' | xargs kill
 ps aux | grep "[u]sr/sbin/dovecot" | awk '{ print $2 }' | xargs kill
+chown -R opendkim:opendkim /etc/opendkim/keys
 rm -f /var/run/dovecot/master.pid
 
 sleep 5
