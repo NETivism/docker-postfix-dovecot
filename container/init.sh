@@ -134,7 +134,6 @@ if [ -n "$mailaddr" ]; then
         then
           touch /etc/dovecot/passwd
           chown root:dovecot /etc/dovecot/passwd
-          chmod 640 /etc/dovecot/passwd
         fi
         echo "$user@$domain:$passhash" >> /etc/dovecot/passwd
       fi
