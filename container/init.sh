@@ -162,6 +162,7 @@ if [ -n "$mailaddr" ]; then
     fi
   done
 fi
+chmod 640 /home/vmail/tmp/*
 
 postconf -e "myhostname = $mailname"
 subj="/C=US/ST=Denial/L=Springfield/O=Dis/CN=$mailname"
