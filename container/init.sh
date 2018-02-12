@@ -133,8 +133,8 @@ if [ -n "$mailaddr" ]; then
         if [[ ! -f /etc/dovecot/passwd ]]
         then
           touch /etc/dovecot/passwd
-          chown root:dovecot /etc/dovecot/passwd
         fi
+        chown root:dovecot /etc/dovecot/passwd
         echo "$user@$domain:$passhash" >> /etc/dovecot/passwd
       fi
 
