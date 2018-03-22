@@ -135,6 +135,7 @@ if [ -n "$mailaddr" ]; then
           touch /etc/dovecot/passwd
         fi
         chown root:dovecot /etc/dovecot/passwd
+        chown root:dovecot /home/vmail/passwd
         echo "$user@$domain:$passhash" >> /etc/dovecot/passwd
       fi
 
