@@ -164,6 +164,10 @@ if [ -n "$mailaddr" ]; then
   done
 fi
 chmod 640 /home/vmail/tmp/*
+if [ -f /home/vmail/passwd ]; then
+  chown root:dovecot /etc/dovecot/passwd
+  chown root:dovecot /home/vmail/passwd
+fi
 
 postconf -e "myhostname = $mailname"
 subj="/C=US/ST=Denial/L=Springfield/O=Dis/CN=$mailname"
