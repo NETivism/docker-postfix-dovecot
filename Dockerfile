@@ -13,7 +13,6 @@ ADD dovecot/dovecot /etc/init.d/dovecot
 ADD postfix/master.cf /etc/postfix/master.cf
 ADD postfix/transport /etc/postfix/transport
 ADD container/supervisord.conf /etc/supervisor/conf.d/supervisord.conf
-ADD rsyslog/50-default.conf /etc/rsyslog.d/50-default.conf
 
 ADD container/init.sh /init.sh
 ADD container/regenpasswd.sh /usr/local/bin/regenpasswd.sh
