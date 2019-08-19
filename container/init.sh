@@ -18,6 +18,7 @@ groupadd -g 5000 vmail > /dev/null
 useradd -u 5000 -g 5000 -s /bin/bash vmail > /dev/null
 usermod -G opendkim postfix
 
+test -f /home/vmail/vhosts && cp -f /home/vmail/vhosts /etc/postfix/vhosts
 test -f /etc/postfix/vhosts || touch /etc/postfix/vhosts
 test -f /etc/postfix/vmaps || touch /etc/postfix/vmaps
 test -f /etc/dovecot/users || touch /etc/dovecot/users
@@ -153,12 +154,18 @@ if [ -n "$mailaddr" ]; then
       #echo "Adding user to /etc/postfix/vmaps"
       echo "$mail  $domain/$user/" >> /etc/postfix/vmaps
       postmap /etc/postfix/vmaps
-      grep -e "$domain" /etc/postfix/vhosts || echo "$domain" >> /etc/postfix/vhosts
+      if [[ ! -f /home/vmail/vhosts ]]
+      then
+        grep -e "$domain" /etc/postfix/vhosts || echo "$domain" >> /etc/postfix/vhosts
+      fi
     else
       grep -e "$user@$domain" /etc/dovecot/users ||  echo "$user@$domain::5000:5000::/home/vmail/$domain/$user/:/bin/false::" >> /etc/dovecot/users
       grep -e $mail /etc/postfix/vmaps || echo "$mail  $domain/$user/" >> /etc/postfix/vmaps
       postmap /etc/postfix/vmaps
-      grep -e "$domain" /etc/postfix/vhosts || echo "$domain" >> /etc/postfix/vhosts
+      if [[ ! -f /home/vmail/vhosts ]]
+      then
+        grep -e "$domain" /etc/postfix/vhosts || echo "$domain" >> /etc/postfix/vhosts
+      fi
       echo "Skipping $user@$domain (already exists)"
     fi
   done
