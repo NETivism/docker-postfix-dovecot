@@ -63,12 +63,16 @@ postconf -e 'smtpd_tls_received_header = yes'
 postconf -e 'smtpd_tls_session_cache_timeout = 3600s'
 postconf -e 'tls_random_source = dev:/dev/urandom'
 postconf -e 'smtpd_tls_mandatory_protocols = !SSLv2, !SSLv3'
+postconf -e 'maximal_queue_lifetime = 5d'
+postconf -e 'maximal_backoff_time = 12h'
+postconf -e 'minimal_backoff_time = 4h'
+postconf -e 'queue_run_delay = 4h'
 postconf -e 'polite_destination_concurrency_limit = 2'
 postconf -e 'polite_destination_rate_delay = 1s'
 postconf -e 'polite_destination_recipient_limit = 5'
 postconf -e 'turtle_destination_concurrency_limit = 1'
-postconf -e 'turtle_destination_rate_delay = 5s'
-postconf -e 'turtle_destination_recipient_limit = 2'
+postconf -e 'turtle_destination_rate_delay = 10s'
+postconf -e 'turtle_destination_recipient_limit = 1'
 
 
 echo -e 'SOCKET="inet:12301@localhost"\n' > /etc/default/opendkim

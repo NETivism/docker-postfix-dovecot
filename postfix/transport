@@ -47,5 +47,15 @@ yahoo.pt        turtle:
 yahoo.ro        turtle:
 yahoo.ru        turtle:
 yahoo.se        turtle:
-gmail.com       polite: 
-hotmail.com     polite: 
+kimo.com        turtle:
+
+# Microsoft
+outlook.com     turtle:
+hotmail.com     turtle:
+hotmail.com.tw  turtle:
+live.com        turtle:
+msn.com         turtle:
+passport.com    turtle:
+passport.net    turtle:
+
+gmail.com       polite:
