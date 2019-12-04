@@ -125,7 +125,7 @@ scalemail-backend unix  -       n       n       -       2       pipe
 mailman   unix  -       n       n       -       -       pipe
   flags=FR user=list argv=/usr/lib/mailman/bin/postfix-to-mailman.py
   ${nexthop} ${user}
-polite unix - - n - - smtp
-  -o syslog_name=postfix-polite
+fast unix - - n - - smtp
+  -o syslog_name=postfix-fast
 turtle unix - - n - - smtp
   -o syslog_name=postfix-turtle
