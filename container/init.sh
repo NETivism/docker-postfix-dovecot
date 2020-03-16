@@ -74,7 +74,7 @@ postconf -e 'smtp_destination_concurrency_limit = 1'
 postconf -e 'smtp_destination_rate_delay = 3s'
 postconf -e 'smtp_destination_recipient_limit = 2'
 postconf -e 'turtle_destination_concurrency_limit = 1'
-postconf -e 'turtle_destination_rate_delay = 10s'
+postconf -e 'turtle_destination_rate_delay = 60s'
 postconf -e 'turtle_destination_recipient_limit = 2'
 
 
