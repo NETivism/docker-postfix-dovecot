@@ -207,9 +207,9 @@ fi
 
 /etc/init.d/postfix stop
 /etc/init.d/opendkim stop
-ps aux | grep "postfix/master" | awk '{ print $2 }' | xargs kill
-ps aux | grep "bin/opendkim" | awk '{ print $2 }' | xargs kill
-ps aux | grep "bin/dovecot" | awk '{ print $2 }' | xargs kill
+ps aux | grep "postfix\/sbin\/master" | awk '{ print $2 }' | xargs kill
+ps aux | grep "bin\/opendkim" | awk '{ print $2 }' | xargs kill
+ps aux | grep "bin\/dovecot" | awk '{ print $2 }' | xargs kill
 chown -R opendkim:opendkim /etc/opendkim/keys
 rm -f /var/run/dovecot/master.pid
 
