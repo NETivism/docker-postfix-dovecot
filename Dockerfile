@@ -1,4 +1,4 @@
-FROM debian:jessie
+FROM debian:buster
 MAINTAINER Jimmy Huang <jimmy@netivism.com.tw>
 
 ENV DEBIAN_FRONTEND noninteractive
