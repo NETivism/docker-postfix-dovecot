@@ -30,56 +30,61 @@ test -f /etc/opendkim/TrustedHosts || touch /etc/opendkim/TrustedHosts
 test -f /etc/opendkim/KeyTable || touch /etc/opendkim/KeyTable
 test -f /etc/opendkim/SigningTable || touch /etc/opendkim/SigningTable
 
-postconf -e 'milter_protocol = 2'
-postconf -e 'milter_default_action = accept'
-postconf -e 'smtpd_milters = inet:127.0.0.1:12301'
-postconf -e 'inet_protocols = ipv4'
-postconf -e 'non_smtpd_milters = $smtpd_milters'
-postconf -e 'virtual_mailbox_domains = /etc/postfix/vhosts'
-postconf -e 'virtual_mailbox_base = /home/vmail'
-postconf -e 'virtual_mailbox_maps = hash:/etc/postfix/vmaps'
-postconf -e 'transport_maps = hash:/etc/postfix/transport'
-postconf -e 'smtpd_tls_key_file = /etc/ssl/private/postfix.pem'
-postconf -e 'smtpd_tls_cert_file = /etc/ssl/certs/postfix.pem'
-postconf -e 'virtual_minimum_uid = 1000'
-postconf -e 'virtual_uid_maps = static:5000'
-postconf -e 'virtual_gid_maps = static:5000'
-postconf -e 'smtpd_helo_required = yes'
-postconf -e 'smtpd_sasl_auth_enable = yes'
-postconf -e 'smtpd_sasl_security_options = noanonymous'
-postconf -e 'smtpd_recipient_restrictions = permit_sasl_authenticated, permit_mynetworks, reject_unauth_destination'
-postconf -e 'smtpd_sasl_type = dovecot'
-postconf -e 'smtpd_sasl_path = private/auth'
-postconf -e 'smtpd_tls_auth_only = no'
-postconf -e 'smtpd_sasl_authenticated_header = yes'
-postconf -e 'smtp_tls_security_level = may'
-postconf -e 'smtpd_tls_security_level = may'
-postconf -e 'smtp_use_tls = yes'
-postconf -e 'local_recipient_maps ='
-postconf -e 'smtpd_use_tls = yes'
-postconf -e 'smtp_tls_note_starttls_offer = yes'
-postconf -e 'smtpd_tls_loglevel = 1'
-postconf -e 'smtpd_tls_received_header = yes'
-postconf -e 'smtpd_tls_session_cache_timeout = 3600s'
-postconf -e 'tls_random_source = dev:/dev/urandom'
-postconf -e 'smtpd_tls_mandatory_protocols = !SSLv2, !SSLv3'
-postconf -e 'maximal_queue_lifetime = 1d'
-postconf -e 'bounce_queue_lifetime = 12h'
-postconf -e 'maximal_backoff_time = 12h'
-postconf -e 'minimal_backoff_time = 9h'
-postconf -e 'queue_run_delay = 9h'
-postconf -e 'qmgr_message_active_limit = 40000'
-postconf -e 'qmgr_message_recipient_limit = 40000'
-postconf -e 'fast_destination_concurrency_limit = 5'
-postconf -e 'fast_destination_rate_delay = 0'
-postconf -e 'fast_destination_recipient_limit = 2'
-postconf -e 'smtp_destination_concurrency_limit = 1'
-postconf -e 'smtp_destination_rate_delay = 3s'
-postconf -e 'smtp_destination_recipient_limit = 2'
-postconf -e 'turtle_destination_concurrency_limit = 1'
-postconf -e 'turtle_destination_rate_delay = 60s'
-postconf -e 'turtle_destination_recipient_limit = 2'
-
+if [ -f "/home/vmail/postfix-main.cf" ]; then
+  cp -f /etc/postfix/main.cf /etc/postfix/main.cf.origin
+  cp -f /home/vmail/postfix-main.cf /etc/postfix/main.cf
+else
+  postconf -e 'milter_protocol = 2'
+  postconf -e 'milter_default_action = accept'
+  postconf -e 'smtpd_milters = inet:127.0.0.1:12301'
+  postconf -e 'inet_protocols = ipv4'
+  postconf -e 'non_smtpd_milters = $smtpd_milters'
+  postconf -e 'virtual_mailbox_domains = /etc/postfix/vhosts'
+  postconf -e 'virtual_mailbox_base = /home/vmail'
+  postconf -e 'virtual_mailbox_maps = hash:/etc/postfix/vmaps'
+  postconf -e 'transport_maps = hash:/etc/postfix/transport'
+  postconf -e 'smtpd_tls_key_file = /etc/ssl/private/postfix.pem'
+  postconf -e 'smtpd_tls_cert_file = /etc/ssl/certs/postfix.pem'
+  postconf -e 'virtual_minimum_uid = 1000'
+  postconf -e 'virtual_uid_maps = static:5000'
+  postconf -e 'virtual_gid_maps = static:5000'
+  postconf -e 'smtpd_helo_required = yes'
+  postconf -e 'smtpd_sasl_auth_enable = yes'
+  postconf -e 'smtpd_sasl_security_options = noanonymous'
+  postconf -e 'smtpd_recipient_restrictions = permit_sasl_authenticated, permit_mynetworks, reject_unauth_destination'
+  postconf -e 'smtpd_sasl_type = dovecot'
+  postconf -e 'smtpd_sasl_path = private/auth'
+  postconf -e 'smtpd_tls_auth_only = no'
+  postconf -e 'smtpd_sasl_authenticated_header = yes'
+  postconf -e 'smtp_tls_security_level = may'
+  postconf -e 'smtpd_tls_security_level = may'
+  postconf -e 'smtp_use_tls = yes'
+  postconf -e 'local_recipient_maps ='
+  postconf -e 'smtpd_use_tls = yes'
+  postconf -e 'smtp_tls_note_starttls_offer = yes'
+  postconf -e 'smtpd_tls_loglevel = 1'
+  postconf -e 'smtpd_tls_received_header = yes'
+  postconf -e 'smtpd_tls_session_cache_timeout = 3600s'
+  postconf -e 'tls_random_source = dev:/dev/urandom'
+  postconf -e 'smtpd_tls_mandatory_protocols = !SSLv2, !SSLv3'
+  postconf -e 'maximal_queue_lifetime = 1d'
+  postconf -e 'bounce_queue_lifetime = 12h'
+  postconf -e 'maximal_backoff_time = 12h'
+  postconf -e 'minimal_backoff_time = 9h'
+  postconf -e 'queue_run_delay = 9h'
+  postconf -e 'qmgr_message_active_limit = 40000'
+  postconf -e 'qmgr_message_recipient_limit = 40000'
+  postconf -e 'fast_destination_concurrency_limit = 5'
+  postconf -e 'fast_destination_rate_delay = 0'
+  postconf -e 'fast_destination_recipient_limit = 2'
+  postconf -e 'smtp_destination_concurrency_limit = 1'
+  postconf -e 'smtp_destination_rate_delay = 3s'
+  postconf -e 'smtp_destination_recipient_limit = 2'
+  postconf -e 'turtle_destination_concurrency_limit = 1'
+  postconf -e 'turtle_destination_rate_delay = 60s'
+  postconf -e 'turtle_destination_recipient_limit = 2'
+  postconf -e 'compatibility_level = 3'
+fi
 
 echo -e 'SOCKET="inet:12301@localhost"\n' > /etc/default/opendkim
 echo -e '' > /home/vmail/tmp/vmail_dkim
@@ -200,14 +205,16 @@ then
 fi
 
 
-ps aux | grep "[u]sr/lib/postfix/master" | awk '{ print $2 }' | xargs kill
-ps aux | grep "[u]sr/sbin/opendkim" | awk '{ print $2 }' | xargs kill
-ps aux | grep "[u]sr/sbin/dovecot" | awk '{ print $2 }' | xargs kill
+/etc/init.d/postfix stop
+/etc/init.d/opendkim stop
+ps aux | grep "postfix/master" | awk '{ print $2 }' | xargs kill
+ps aux | grep "bin/opendkim" | awk '{ print $2 }' | xargs kill
+ps aux | grep "bin/dovecot" | awk '{ print $2 }' | xargs kill
 chown -R opendkim:opendkim /etc/opendkim/keys
 rm -f /var/run/dovecot/master.pid
 
 sleep 5
 
-service postfix restart
-service opendkim restart
+/etc/init.d/postfix start
+/etc/init.d/opendkim start 
 /usr/sbin/dovecot -c /etc/dovecot/dovecot.conf -F
