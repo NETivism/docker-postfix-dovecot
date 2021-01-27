@@ -86,7 +86,6 @@ else
   postconf -e 'compatibility_level = 3'
 fi
 
-echo -e 'SOCKET="inet:12301@localhost"\n' > /etc/default/opendkim
 echo -e '' > /home/vmail/tmp/vmail_dkim
 if [ -z "$MAILADDR" ]; then
   mailaddr=`cat /home/vmail/mailaddr`
