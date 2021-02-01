@@ -36,7 +36,7 @@ if [ -f "/home/vmail/postfix-main.cf" ]; then
 else
   postconf -e 'milter_protocol = 2'
   postconf -e 'milter_default_action = accept'
-  postconf -e 'smtpd_milters = inet:127.0.0.1:12301'
+  postconf -e 'smtpd_milters = unix:/var/run/opendkim/opendkim.sock'
   postconf -e 'inet_protocols = ipv4'
   postconf -e 'non_smtpd_milters = $smtpd_milters'
   postconf -e 'virtual_mailbox_domains = /etc/postfix/vhosts'
