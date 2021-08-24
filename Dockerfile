@@ -24,4 +24,6 @@ RUN chmod +x /usr/local/bin/regenpasswd.sh
 RUN chmod +x /usr/local/bin/removemail.sh
 RUN chmod +x /usr/local/bin/pqueue
 
+RUN sed -i 's/^mydestination = \$myhostname,/mydestination =/g' /etc/postfix/main.cf
+
 CMD ["/usr/bin/supervisord"]
