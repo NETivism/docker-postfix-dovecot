@@ -114,7 +114,14 @@ if [ -n "$mailaddr" ]; then
 
     dkim="/etc/opendkim/keys/$domain"
 
-    if [[ ! -d $dkim ]]
+    if [[ -f "/etc/opendkim/globalkey.private" ]]
+    then
+      chown opendkim:opendkim /etc/opendkim/globalkey.private
+      chmod 600 /etc/opendkim/globalkey.private
+      grep -qF "$domain" /etc/opendkim/TrustedHosts || echo -e "127.0.0.1\nlocalhost\n192.168.0.1/24\n*.$domain" >> /etc/opendkim/TrustedHosts
+      grep -qF "*@$domain netimx._domainkey.$domain" /etc/opendkim/SigningTable || echo -e "*@$domain netimx._domainkey.$domain\n$(cat /etc/opendkim/SigningTable)" > /etc/opendkim/SigningTable
+      grep -qF "netimx._domainkey.$domain $domain:netimx:/etc/opendkim/globalkey.private" /etc/opendkim/KeyTable || echo "netimx._domainkey.$domain $domain:netimx:/etc/opendkim/globalkey.private" >> /etc/opendkim/KeyTable
+    elif [[ ! -d $dkim ]]
     then
       # echo "Creating OpenDKIM folder $dkim"
       mkdir -p $dkim
