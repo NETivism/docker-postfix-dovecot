@@ -45,7 +45,7 @@ jobs:
             ${{ github.repository }}
             ghcr.io/${{ github.repository }}
             rg.netivism.com.tw/${{ github.repository }}
-					tags: |
+          tags: |
             type=schedule
             type=ref,event=branch
             type=ref,event=tag
