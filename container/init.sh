@@ -197,6 +197,22 @@ if [ -n "$mailaddr" ]; then
     fi
   done
 fi
+
+dkimaddr=`cat /home/vmail/dkimaddr`
+if [ -n "$dkimaddr" ]; then
+  while read -r dkimdomain
+  do
+    if [[ -z "$dkimdomain" ]]; then
+      continue
+    fi
+    if [[ -f "/etc/opendkim/globalkey.private" ]]
+    then
+      grep -qF "*@$dkimdomain $dkimp._domainkey.$dkimdomain" /etc/opendkim/SigningTable || echo -e "*@$dkimdomain $dkimp._domainkey.$dkimdomain\n$(cat /etc/opendkim/SigningTable)" > /etc/opendkim/SigningTable
+      grep -qF "$dkimp._domainkey.$dkimdomain $dkimdomain:$dkimp:/etc/opendkim/globalkey.private" /etc/opendkim/KeyTable || echo "$dkimp._domainkey.$dkimdomain $dkimdomain:$dkimp:/etc/opendkim/globalkey.private" >> /etc/opendkim/KeyTable
+    fi
+  done < /home/vmail/dkimaddr
+fi
+
 chmod 640 /home/vmail/tmp/*
 if [ -f /home/vmail/passwd ]; then
   chown root:dovecot /etc/dovecot/passwd
