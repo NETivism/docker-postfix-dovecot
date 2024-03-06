@@ -1,4 +1,4 @@
-FROM debian:jessie
+FROM debian:bookworm
 MAINTAINER Jimmy Huang <jimmy@netivism.com.tw>
 
 ENV DEBIAN_FRONTEND noninteractive
@@ -17,8 +17,13 @@ ADD container/supervisord.conf /etc/supervisor/conf.d/supervisord.conf
 ADD container/init.sh /init.sh
 ADD container/regenpasswd.sh /usr/local/bin/regenpasswd.sh
 ADD container/regenpasswd.sh /usr/local/bin/removemail.sh
+ADD container/pqueue /usr/local/bin/pqueue
+
 RUN chmod +x /init.sh
 RUN chmod +x /usr/local/bin/regenpasswd.sh
 RUN chmod +x /usr/local/bin/removemail.sh
+RUN chmod +x /usr/local/bin/pqueue
+
+RUN sed -i 's/^mydestination = \$myhostname,/mydestination =/g' /etc/postfix/main.cf
 
 CMD ["/usr/bin/supervisord"]
