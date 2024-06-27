@@ -7,6 +7,12 @@ elif [ "$FQDN" = "1" ]
 then
   mailname=$(hostname -f)
 fi
+if [ -n "$DKIM_PREFIX" ]
+then
+  dkimp=$DKIM_PREFIX
+else
+  dkimp="mail"
+fi
 
 if [ -f /etc/dovecot/passwd ]; then
   rm -f /etc/dovecot/passwd
@@ -119,18 +125,18 @@ if [ -n "$mailaddr" ]; then
       chown opendkim:opendkim /etc/opendkim/globalkey.private
       chmod 600 /etc/opendkim/globalkey.private
       grep -qF "$domain" /etc/opendkim/TrustedHosts || echo -e "127.0.0.1\nlocalhost\n192.168.0.1/24\n*.$domain" >> /etc/opendkim/TrustedHosts
-      grep -qF "*@$domain netimx._domainkey.$domain" /etc/opendkim/SigningTable || echo -e "*@$domain netimx._domainkey.$domain\n$(cat /etc/opendkim/SigningTable)" > /etc/opendkim/SigningTable
-      grep -qF "netimx._domainkey.$domain $domain:netimx:/etc/opendkim/globalkey.private" /etc/opendkim/KeyTable || echo "netimx._domainkey.$domain $domain:netimx:/etc/opendkim/globalkey.private" >> /etc/opendkim/KeyTable
+      grep -qF "*@$domain $dkimp._domainkey.$domain" /etc/opendkim/SigningTable || echo -e "*@$domain $dkimp._domainkey.$domain\n$(cat /etc/opendkim/SigningTable)" > /etc/opendkim/SigningTable
+      grep -qF "$dkimp._domainkey.$domain $domain:$dkimp:/etc/opendkim/globalkey.private" /etc/opendkim/KeyTable || echo "$dkimp._domainkey.$domain $domain:$dkimp:/etc/opendkim/globalkey.private" >> /etc/opendkim/KeyTable
     elif [[ ! -d $dkim ]]
     then
       # echo "Creating OpenDKIM folder $dkim"
       mkdir -p $dkim
-      cd $dkim && opendkim-genkey -s mail -d $domain
+      cd $dkim && opendkim-genkey -s $dkimp -d $domain
       chown -R opendkim:opendkim /etc/opendkim/keys/
       echo -e "127.0.0.1\nlocalhost\n192.168.0.1/24\n*.$domain" >> /etc/opendkim/TrustedHosts
-      echo "*@$domain mail._domainkey.$domain" >> /etc/opendkim/SigningTable
-      echo "mail._domainkey.$domain $domain:mail:$dkim/mail.private" >> /etc/opendkim/KeyTable
-      cat "$dkim/mail.txt" > /home/vmail/tmp/vmail_dkim
+      echo "*@$domain $dkimp._domainkey.$domain" >> /etc/opendkim/SigningTable
+      echo "$dkimp._domainkey.$domain $domain:$dkimp:$dkim/$dkimp.private" >> /etc/opendkim/KeyTable
+      cat "$dkim/$dkimp.txt" > /home/vmail/tmp/vmail_dkim
     fi
 
     # maildirmake.dovecot does only chown on user directory, we'll create domain directory instead
@@ -191,6 +197,22 @@ if [ -n "$mailaddr" ]; then
     fi
   done
 fi
+
+dkimaddr=`cat /home/vmail/dkimaddr`
+if [ -n "$dkimaddr" ]; then
+  while read -r dkimdomain
+  do
+    if [[ -z "$dkimdomain" ]]; then
+      continue
+    fi
+    if [[ -f "/etc/opendkim/globalkey.private" ]]
+    then
+      grep -qF "*@$dkimdomain $dkimp._domainkey.$dkimdomain" /etc/opendkim/SigningTable || echo -e "*@$dkimdomain $dkimp._domainkey.$dkimdomain\n$(cat /etc/opendkim/SigningTable)" > /etc/opendkim/SigningTable
+      grep -qF "$dkimp._domainkey.$dkimdomain $dkimdomain:$dkimp:/etc/opendkim/globalkey.private" /etc/opendkim/KeyTable || echo "$dkimp._domainkey.$dkimdomain $dkimdomain:$dkimp:/etc/opendkim/globalkey.private" >> /etc/opendkim/KeyTable
+    fi
+  done < /home/vmail/dkimaddr
+fi
+
 chmod 640 /home/vmail/tmp/*
 if [ -f /home/vmail/passwd ]; then
   chown root:dovecot /etc/dovecot/passwd
