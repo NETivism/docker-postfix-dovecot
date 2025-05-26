@@ -220,6 +220,102 @@ if [ -f /home/vmail/passwd ]; then
 fi
 
 postconf -e "myhostname = $mailname"
+
+setup_header_check() {
+  echo "[Header Check] Starting Postfix header_check configuration..."
+
+  local HEADER_CHECK_FILE="/etc/postfix/header_check"
+
+  echo "[Header Check] Using default rule with heredoc method"
+
+  # Check and create/update header_check file
+  if [ -f "$HEADER_CHECK_FILE" ]; then
+    echo "[Header Check] Found existing file: $HEADER_CHECK_FILE"
+
+    # Check if Feedback-ID related rules are already included
+    if grep -q "Feedback-ID:" "$HEADER_CHECK_FILE"; then
+      echo "[Header Check] File already contains Feedback-ID rules"
+
+      # Check if it contains the correct rule with $1
+      if grep -q "PREPEND X-Log-Feedback-ID: \$1" "$HEADER_CHECK_FILE"; then
+        echo "[Header Check] ✓ Target rule already exists, no modification needed"
+        return 0
+      else
+        echo "[Header Check] Found different rule, appending new rule..."
+        echo "" >> "$HEADER_CHECK_FILE"  # Add blank line
+        echo "# Added by Header Check setup - $(date)" >> "$HEADER_CHECK_FILE"
+        # Use heredoc to ensure $1 is written correctly
+        cat >> "$HEADER_CHECK_FILE" << 'EOF'
+/^Feedback-ID:\s*(\d+):/ PREPEND X-Log-Feedback-ID: $1
+EOF
+        echo "[Header Check] ✓ New rule appended"
+      fi
+    else
+      echo "[Header Check] No Feedback-ID rule found, appending..."
+      echo "" >> "$HEADER_CHECK_FILE"  # Add blank line
+      echo "# Added by Header Check setup - $(date)" >> "$HEADER_CHECK_FILE"
+      # Use heredoc to ensure $1 is written correctly
+      cat >> "$HEADER_CHECK_FILE" << 'EOF'
+/^Feedback-ID:\s*(\d+):/ PREPEND X-Log-Feedback-ID: $1
+EOF
+      echo "[Header Check] ✓ Rule appended to existing file"
+    fi
+  else
+    echo "[Header Check] Creating new header_check file..."
+    # Use heredoc to ensure $1 is written correctly
+    cat > "$HEADER_CHECK_FILE" << 'EOF'
+# Header Check Rules - Created by init.sh $(date)
+/^Feedback-ID:\s*(\d+):/ PREPEND X-Log-Feedback-ID: $1
+EOF
+    echo "[Header Check] ✓ New file created and rule added"
+  fi
+
+  # Set file permissions
+  chmod 644 "$HEADER_CHECK_FILE"
+  chown root:root "$HEADER_CHECK_FILE"
+
+  # Display file content
+  echo "[Header Check] === File Content ==="
+  cat "$HEADER_CHECK_FILE" | while read line; do
+    echo "[Header Check] $line"
+  done
+  echo "[Header Check] ====================="
+
+  # Update Postfix configuration
+  echo "[Header Check] Updating Postfix configuration..."
+  postconf -e 'header_checks = pcre:/etc/postfix/header_check'
+
+  # Verify configuration
+  if postconf header_checks | grep -q "pcre:/etc/postfix/header_check"; then
+    echo "[Header Check] ✓ Postfix configuration updated"
+  else
+    echo "[Header Check] ✗ Warning: Postfix configuration update failed"
+    return 1
+  fi
+
+  echo "[Header Check] ✓ Header Check configuration completed"
+  return 0
+}
+
+# Check if Header Check feature is enabled - Default enabled, supports multiple formats
+# Default behavior: If ENABLE_HEADER_CHECK is not set, default to enabled
+ENABLE_HEADER_CHECK_VALUE="${ENABLE_HEADER_CHECK:-true}"
+
+if [ "$ENABLE_HEADER_CHECK_VALUE" = "true" ] || [ "$ENABLE_HEADER_CHECK_VALUE" = "True" ] || [ "$ENABLE_HEADER_CHECK_VALUE" = "TRUE" ] || \
+   [ "$ENABLE_HEADER_CHECK_VALUE" = "1" ] || [ "$ENABLE_HEADER_CHECK_VALUE" = "yes" ] || [ "$ENABLE_HEADER_CHECK_VALUE" = "YES" ] || \
+   [ "$ENABLE_HEADER_CHECK_VALUE" = "on" ] || [ "$ENABLE_HEADER_CHECK_VALUE" = "ON" ]; then
+  echo "[Init] Header Check feature is enabled (ENABLE_HEADER_CHECK=$ENABLE_HEADER_CHECK_VALUE)"
+  setup_header_check
+  if [ $? -eq 0 ]; then
+    echo "[Init] Header Check feature configured successfully"
+  else
+    echo "[Init] Warning: Header Check configuration failed"
+  fi
+else
+  echo "[Init] Header Check feature is disabled (ENABLE_HEADER_CHECK=$ENABLE_HEADER_CHECK_VALUE)"
+  echo "[Init] To enable Header Check, set ENABLE_HEADER_CHECK=true (or 1, yes, on)"
+fi
+
 subj="/C=US/ST=Denial/L=Springfield/O=Dis/CN=$mailname"
 
 if [[ ! -a '/etc/ssl/certs/dovecot.pem' ]]
