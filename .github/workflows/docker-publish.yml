@@ -23,13 +23,6 @@ jobs:
           username: ${{ secrets.DOCKER_REGISTRY_USER }}
           password: ${{ secrets.DOCKER_REGISTRY_PASS }}
 
-      - name: Log in to NETivism Registry
-        uses: docker/login-action@v2
-        with:
-          registry: rg.netivism.com.tw
-          username: ${{ secrets.NETIVISM_REGISTRY_USER }}
-          password: ${{ secrets.NETIVISM_REGISTRY_PASS }}
-
       - name: Log in to the Container registry
         uses: docker/login-action@v2
         with:
@@ -44,7 +37,6 @@ jobs:
           images: |
             ${{ github.repository }}
             ghcr.io/${{ github.repository }}
-            rg.netivism.com.tw/${{ github.repository }}
           tags: |
             type=schedule
             type=ref,event=branch
