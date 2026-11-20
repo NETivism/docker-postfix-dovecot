@@ -55,7 +55,12 @@ else
   postconf -e 'virtual_uid_maps = static:5000'
   postconf -e 'virtual_gid_maps = static:5000'
   postconf -e 'smtpd_helo_required = yes'
-  postconf -e 'smtpd_sasl_auth_enable = yes'
+  # Off by default (port 25 only receives mail and bounces). SASL is enabled per
+  # service in master.cf: submission (587), smtps (465), 2525.
+  postconf -e 'smtpd_sasl_auth_enable = no'
+  # Loopback only, pinned instead of derived from mynetworks_style. Containers on
+  # the same host come in as the docker gateway (docker-proxy) and must log in.
+  postconf -e 'mynetworks = 127.0.0.0/8 [::ffff:127.0.0.0]/104 [::1]/128'
   postconf -e 'smtpd_sasl_security_options = noanonymous'
   postconf -e 'smtpd_recipient_restrictions = permit_sasl_authenticated, permit_mynetworks, reject_unauth_destination'
   postconf -e 'smtpd_sasl_type = dovecot'
